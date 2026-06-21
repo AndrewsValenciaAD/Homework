@@ -1,3 +1,4 @@
+#*******************AVANCE*******************
 import random
 print("===== Bienvenido a mi primer juego =====\n")
 print("===== PIEDRA, PAPEL O TIJERA =====\n")
