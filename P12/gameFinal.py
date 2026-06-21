@@ -1,3 +1,4 @@
+#*************************RESULTADO FINAL************************
 import random
 
 print("===== PIEDRA, PAPEL O TIJERA =====\n")
