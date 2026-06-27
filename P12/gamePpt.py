@@ -1,52 +1,108 @@
-#*************************RESULTADO FINAL************************
+#__________________________________________FINAL RROYECT___________________________________________
 import random
+import json
+import os
 
-print("===== PIEDRA, PAPEL O TIJERA =====\n")
+ARCHIVO_ESTADISTICAS = "estadisticas.json"
 
-jugar = "si"
+# ─── Estadísticas ─────────────────────────────────────────────────────────────
 
-while jugar == "si":
-    print("¿QUÉ ELIGES?")
-    print("1. Piedra")
-    print("2. Papel")
-    print("3. Tijera")
-    
-    opcion_usuario = input("\nIngresa tu opción (1, 2 o 3): ")
-    
-    # Convertir la opción del usuario
-    if opcion_usuario == "1":
-        usuario = "piedra"
-    elif opcion_usuario == "2":
-        usuario = "papel"
-    elif opcion_usuario == "3":
-        usuario = "tijera"
-    else:
-        print("Opción inválida\n")
-        continue
-    
-    # Generar opción de la computadora
-    computadora = random.choice(["piedra", "papel", "tijera"])
-    
-    # Mostrar lo que eligió cada uno
-    print("\n--- RESULTADO ---")
-    print(f"Tú elegiste: {usuario}")
-    print(f"Computadora eligió: {computadora}")
-    print()
-    
-    # Comparar y determinar ganador
+def cargar_estadisticas():
+    if os.path.exists(ARCHIVO_ESTADISTICAS):
+        with open(ARCHIVO_ESTADISTICAS, "r") as archivo:
+            return json.load(archivo)
+    return {"victorias": 0, "derrotas": 0, "empates": 0}
+
+def guardar_estadisticas(estadisticas):
+    with open(ARCHIVO_ESTADISTICAS, "w") as archivo:
+        json.dump(estadisticas, archivo, indent=4)
+
+def mostrar_estadisticas(estadisticas):
+    print("\n--- Estadísticas ---")
+    print("Victorias:", estadisticas["victorias"])
+    print("Derrotas: ", estadisticas["derrotas"])
+    print("Empates:  ", estadisticas["empates"])
+
+# ─── Entrada del usuario ──────────────────────────────────────────────────────
+
+def pedir_jugada():
+    # Repetimos la pregunta hasta que el usuario ingrese 1, 2 o 3
+    while True:
+        print("\n1. Piedra")
+        print("2. Papel")
+        print("3. Tijera")
+        opcion = input("Elige una opción (1, 2 o 3): ").strip()
+
+        if opcion == "1":
+            return "piedra"
+        elif opcion == "2":
+            return "papel"
+        elif opcion == "3":
+            return "tijera"
+        else:
+            print("Opción inválida. Por favor ingresa 1, 2 o 3.")
+
+def pedir_si_no(pregunta):
+    # Repetimos la pregunta hasta recibir 's' o 'n'
+    while True:
+        respuesta = input(pregunta + " (s/n): ").strip().lower()
+        if respuesta == "s":
+            return True
+        elif respuesta == "n":
+            return False
+        else:
+            print("Por favor ingresa 's' para sí o 'n' para no.")
+
+# ─── Lógica del juego ─────────────────────────────────────────────────────────
+
+def opcion_computadora():
+    return random.choice(["piedra", "papel", "tijera"])
+
+def decidir_ganador(usuario, computadora):
     if usuario == computadora:
-        print("¡EMPATE!")
-    elif usuario == "piedra" and computadora == "tijera":
-        print("¡GANASTE! Piedra vence a Tijera")
-    elif usuario == "papel" and computadora == "piedra":
-        print("¡GANASTE! Papel vence a Piedra")
-    elif usuario == "tijera" and computadora == "papel":
-        print("¡GANASTE! Tijera vence a Papel")
-    else:
-        print("Perdiste esta ronda")
-    
-    # Preguntar si quiere jugar de nuevo
-    print()
-    jugar = input("¿Quieres jugar de nuevo? (si/no): ")
+        return "empate"
+    # Condiciones donde el usuario gana
+    if (usuario == "piedra" and computadora == "tijera") or \
+       (usuario == "tijera" and computadora == "papel") or \
+       (usuario == "papel"  and computadora == "piedra"):
+        return "ganaste"
+    return "perdiste"
 
-print("\n¡Gracias por jugar!")
+# ─── Programa principal ───────────────────────────────────────────────────────
+
+print("=== Piedra, Papel o Tijera ===")
+
+estadisticas = cargar_estadisticas()
+
+while True:
+    # Turno del jugador y la computadora
+    jugada_usuario      = pedir_jugada()
+    jugada_computadora  = opcion_computadora()
+
+    print("\nTú elegiste:  ", jugada_usuario)
+    print("La PC eligió: ", jugada_computadora)
+
+    # Resultado de la ronda
+    resultado = decidir_ganador(jugada_usuario, jugada_computadora)
+
+    if resultado == "ganaste":
+        print("¡Ganaste!")
+        estadisticas["victorias"] += 1
+    elif resultado == "perdiste":
+        print("Perdiste.")
+        estadisticas["derrotas"] += 1
+    else:
+        print("¡Empate!")
+        estadisticas["empates"] += 1
+
+    guardar_estadisticas(estadisticas)
+
+    # Preguntar si quiere continuar o ver estadísticas
+    if pedir_si_no("\n¿Ver estadísticas?"):
+        mostrar_estadisticas(estadisticas)
+
+    if not pedir_si_no("¿Jugar otra ronda?"):
+        break
+
+mostrar_estadisticas(estadisticas)
+print("\n¡Hasta la próxima!")
